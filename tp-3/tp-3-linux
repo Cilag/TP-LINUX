@@ -1,0 +1,51 @@
+# TP 3 : We do a little scripting
+
+## 0. Un premier script
+```
+[john@localhost ~]$ mkdir srv
+[john@localhost ~]$ cd srv/
+[john@localhost srv]$ touch test.sh
+[john@localhost srv]$ sudo nano test.sh
+[john@localhost srv]$ sudo cat test.sh
+
+
+#!/bin/bash
+# Simple test script
+
+echo "Connecté actuellement avec l'utilisateur $(whoami)."
+
+
+[john@localhost srv]$ chown john test.sh
+[john@localhost srv]$ ls -l
+total 4
+-rw-r--r--. 1 john john 94 Jan  3 11:36 test.sh
+[john@localhost srv]$ sudo chmod 744 test.sh
+[john@localhost srv]$ ls -l
+total 4
+-rwxr--r--. 1 john john 94 Jan  3 10:11 test.sh
+[john@localhost ~]$ ./srv/test.sh
+Connecté actuellement avec l'utilisateur john.
+[john@localhost ~]$ cd srv/
+[john@localhost srv]$ ./test.sh
+Connecté actuellement avec l'utilisateur john.
+```
+
+## I. Script carte d'identité
+
+```
+[john@localhost idcard]$ ./idcard.sh
+Machine name :  localhost
+OS Rocky Linux 9.0 (Blue Onyx) and kernel version is 5.14.0-70.30.1.el9_0.x86_64
+IP : 10.4.1.5/24
+RAM :629Mi memory available on 1.3Gi total memory
+Disk : 1.2G space left
+Top 5 processes by RAM usage :
+ 4.0 /usr/bin/python3 -s /usr/sbin/firewalld --nofork --nopid
+ 2.1 /usr/sbin/NetworkManager --no-daemon
+ 1.5 /usr/lib/systemd/systemd --switched-root --system --deserialize 30
+ 1.3 /usr/lib/systemd/systemd --user
+ 1.2 /usr/lib/systemd/systemd-logind
+Listening ports :
+ - 22 tcp : sshd
+Here is your random cat : ./super_cat.jpg
+```
