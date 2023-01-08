@@ -1,0 +1,8 @@
+[Unit]
+Description=Youtube downloader
+
+[Service]
+ExecStart=sudo bash /home/john/srv/yt/yt-v2.sh
+
+[Install]
+WantedBy=multi-user.target
