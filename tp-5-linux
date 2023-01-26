@@ -1,0 +1,180 @@
+# TP5 : Self-hosted cloud
+## Partie 1 : Mise en place et maîtrise du serveur Web
+## 1. Installation
+### 🌞 Installer le serveur Apache 🌞
+```
+[john@localhost ~]$ sudo dnf install httpd
+```
+
+### 🌞 Démarrer le service Apache 🌞
+
+```
+[john@localhost ~]$ sudo systemctl start httpd
+[john@localhost ~]$ sudo systemctl enable httpd
+Created symlink /etc/systemd/system/multi-user.target.wants/httpd.service → /usr/lib/systemd/system/httpd.service.
+[john@localhost ~]$ systemctl status httpd
+● httpd.service - The Apache HTTP Server
+     Loaded: loaded (/usr/lib/systemd/system/httpd.service; enabled; vendor preset: disabled)
+     Active: active (running) since Tue 2023-01-17 12:05:54 CET; 3min 34s ago
+       Docs: man:httpd.service(8)
+   Main PID: 1614 (httpd)
+     Status: "Total requests: 0; Idle/Busy workers 100/0;Requests/sec: 0; Bytes served/sec:   0 B/sec"
+      Tasks: 213 (limit: 4636)
+     Memory: 33.2M
+        CPU: 721ms
+     CGroup: /system.slice/httpd.service
+             ├─1614 /usr/sbin/httpd -DFOREGROUND
+             ├─1615 /usr/sbin/httpd -DFOREGROUND
+             ├─1616 /usr/sbin/httpd -DFOREGROUND
+             ├─1617 /usr/sbin/httpd -DFOREGROUND
+             └─1618 /usr/sbin/httpd -DFOREGROUND
+
+Jan 17 12:05:54 localhost.localdomain systemd[1]: Starting The Apache HTTP Server...
+Jan 17 12:05:54 localhost.localdomain httpd[1614]: AH00558: httpd: Could not reliably determine the server's fully qualified domain >
+Jan 17 12:05:54 localhost.localdomain httpd[1614]: Server configured, listening on: port 80
+Jan 17 12:05:54 localhost.localdomain systemd[1]: Started The Apache HTTP Server.
+[john@localhost ~]$ sudo systemctl is-enabled httpd
+[sudo] password for john:
+enabled
+[john@localhost ~]$ sudo ss -lantpu | grep httpd
+tcp   LISTEN 0      511                   *:80              *:*     users:(("httpd",pid=1618,fd=4),("httpd",pid=1617,fd=4),("httpd",pid=1616,fd=4),("httpd",pid=1614,fd=4))
+[john@localhost ~]$ sudo firewall-cmd --zone=public --permanent --add-port=443/tcp
+success
+[john@localhost ~]$ sudo firewall-cmd --reload
+success
+```
+
+### 🌞 TEST 🌞
+
+```
+ozoux@Guillaume MINGW64 ~
+$ curl http://10.105.1.11/ |head -10
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0<!doctype html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <title>HTTP Server Test Page powered by: Rocky Linux</title>
+    <style type="text/css">
+      /*<![CDATA[*/
+
+100  7620  100  7620    0     0  1207k      0 --:--:-- --:--:-- --:--:-- 1488k      html {
+
+```
+
+## 2. Avancer vers la maîtrise du service
+### 🌞 Le service Apache... 🌞
+
+```
+[john@localhost ~]$ cd /etc
+[john@localhost etc]$ systemctl cat httpd | tail -10
+ExecStart=/usr/sbin/httpd $OPTIONS -DFOREGROUND
+ExecReload=/usr/sbin/httpd $OPTIONS -k graceful
+# Send SIGWINCH for graceful stop
+KillSignal=SIGWINCH
+KillMode=mixed
+PrivateTmp=true
+OOMPolicy=continue
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### 🌞 Déterminer sous quel utilisateur tourne le processus Apache 🌞
+
+```
+[john@localhost ~]$ sudo cat /etc/httpd/conf/httpd.conf | grep apache
+[sudo] password for john:
+User apache
+Group apache
+    # http://httpd.apache.org/docs/2.4/mod/core.html#options
+[john@localhost httpd]$ ps -ef | grep httpd
+root        1614       1  0 12:05 ?        00:00:00 /usr/sbin/httpd -DFOREGROUND
+apache      1615    1614  0 12:05 ?        00:00:00 /usr/sbin/httpd -DFOREGROUND
+apache      1616    1614  0 12:05 ?        00:00:02 /usr/sbin/httpd -DFOREGROUND
+apache      1617    1614  0 12:05 ?        00:00:02 /usr/sbin/httpd -DFOREGROUND
+apache      1618    1614  0 12:05 ?        00:00:02 /usr/sbin/httpd -DFOREGROUND
+john        1916    1281  0 12:37 pts/0    00:00:00 grep --color=auto httpd
+[john@localhost httpd]$ cd /usr/share/testpage/
+[john@localhost testpage]$ ls -al
+total 12
+drwxr-xr-x.  2 root root   24 Jan 17 12:02 .
+drwxr-xr-x. 83 root root 4096 Jan 17 12:02 ..
+-rw-r--r--.  1 root root 7620 Jul 27 20:05 index.html
+```
+
+### 🌞 Changer l'utilisateur utilisé par Apache 🌞
+
+```
+[john@localhost ~]$ sudo useradd guillaume -s /sbin/nologin -u 6969 -d /usr/share/httpd -p root
+[john@localhost ~]$ sudo cat /etc/passwd | tail -2
+apache:x:48:48:Apache:/usr/share/httpd:/sbin/nologin
+guillaume:x:6969:6969::/usr/share/httpd:/sbin/nologin
+[john@localhost ~]$ sudo cat /etc/httpd/conf/httpd.conf | grep guillaume
+User guillaume
+Group guillaume
+[john@localhost /]$ sudo systemctl restart httpd
+[john@localhost /]$ systemctl status httpd
+● httpd.service - The Apache HTTP Server
+     Loaded: loaded (/usr/lib/systemd/system/httpd.service; enabled; vendor preset: disabled)
+     Active: active (running) since Thu 2023-01-26 16:18:49 CET; 14s ago
+       Docs: man:httpd.service(8)
+   Main PID: 1604 (httpd)
+     Status: "Total requests: 0; Idle/Busy workers 100/0;Requests/sec: 0; Bytes served/sec:   0 B/sec"
+      Tasks: 213 (limit: 4636)
+     Memory: 24.9M
+        CPU: 101ms
+     CGroup: /system.slice/httpd.service
+             ├─1604 /usr/sbin/httpd -DFOREGROUND
+             ├─1606 /usr/sbin/httpd -DFOREGROUND
+             ├─1607 /usr/sbin/httpd -DFOREGROUND
+             ├─1608 /usr/sbin/httpd -DFOREGROUND
+             └─1609 /usr/sbin/httpd -DFOREGROUND
+
+Jan 26 16:18:49 localhost.localdomain systemd[1]: Starting The Apache HTTP Server...
+Jan 26 16:18:49 localhost.localdomain httpd[1604]: AH00558: httpd: Could not reliably determine the server's fully qualified domain >
+Jan 26 16:18:49 localhost.localdomain httpd[1604]: Server configured, listening on: port 80
+Jan 26 16:18:49 localhost.localdomain systemd[1]: Started The Apache HTTP Server.
+[john@localhost /]$ ps -ef | grep guillaume
+guillaume      1488    1487  0 09:16 ?        00:00:00 /usr/sbin/httpd -DFOREGROUND
+guillaume      1489    1487  0 09:16 ?        00:00:00 /usr/sbin/httpd -DFOREGROUND
+guillaume      1490    1487  0 09:16 ?        00:00:00 /usr/sbin/httpd -DFOREGROUND
+guillaume      1491    1487  0 09:16 ?        00:00:00 /usr/sbin/httpd -DFOREGROUND
+john    1706    1410  0 09:17 pts/0    00:00:00 grep --color=auto guillaume
+```
+
+### 🌞 Faites en sorte que Apache tourne sur un autre port 🌞
+
+```
+[john@localhost /]$ sudo cat /etc/httpd/conf/httpd.conf | grep Listen
+Listen 8080
+[john@localhost /]$ sudo firewall-cmd --zone=public --permanent --add-port=8080/tcp
+success
+[john@localhost /]$ sudo firewall-cmd --reload
+success
+[john@localhost /]$ sudo systemctl restart httpd
+[john@localhost /]$ systemctl status httpd
+● httpd.service - The Apache HTTP Server
+     Loaded: loaded (/usr/lib/systemd/system/httpd.service; enabled; ve>
+     Active: active (running) since Mon 2023-01-09 09:21:51 CET; 5s ago
+       Docs: man:httpd.service(8)
+   Main PID: 1741 (httpd)
+     Status: "Started, listening on: port 8080"
+      Tasks: 213 (limit: 4631)
+     Memory: 22.9M
+        CPU: 43ms
+     CGroup: /system.slice/httpd.service
+             ├─1741 /usr/sbin/httpd -DFOREGROUND
+             ├─1743 /usr/sbin/httpd -DFOREGROUND
+             ├─1744 /usr/sbin/httpd -DFOREGROUND
+             ├─1745 /usr/sbin/httpd -DFOREGROUND
+             └─1746 /usr/sbin/httpd -DFOREGROUND
+
+Jan 09 09:21:51 localhost.localdomain systemd[1]: Starting The Apache H>
+Jan 09 09:21:51 localhost.localdomain httpd[1741]: AH00558: httpd: Coul>
+Jan 09 09:21:51 localhost.localdomain httpd[1741]: Server configured, l>
+Jan 09 09:21:51 localhost.localdomain systemd[1]: Started The Apache HT>
+lines 1-20/20 (END)
+```
