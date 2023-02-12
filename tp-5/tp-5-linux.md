@@ -3,16 +3,16 @@
 ## 1. Installation
 ### 🌞 Installer le serveur Apache 🌞
 ```
-[john@localhost ~]$ sudo dnf install httpd
+[john@db ~]$ sudo dnf install httpd
 ```
 
 ### 🌞 Démarrer le service Apache 🌞
 
 ```
-[john@localhost ~]$ sudo systemctl start httpd
-[john@localhost ~]$ sudo systemctl enable httpd
+[john@db ~]$ sudo systemctl start httpd
+[john@db ~]$ sudo systemctl enable httpd
 Created symlink /etc/systemd/system/multi-user.target.wants/httpd.service → /usr/lib/systemd/system/httpd.service.
-[john@localhost ~]$ systemctl status httpd
+[john@db ~]$ systemctl status httpd
 ● httpd.service - The Apache HTTP Server
      Loaded: loaded (/usr/lib/systemd/system/httpd.service; enabled; ve>
      Active: active (running) since Tue 2023-01-03 15:14:05 CET; 21s ago
@@ -29,18 +29,18 @@ Created symlink /etc/systemd/system/multi-user.target.wants/httpd.service → /u
              ├─38463 /usr/sbin/httpd -DFOREGROUND
              └─38464 /usr/sbin/httpd -DFOREGROUND
 
-Jan 03 15:14:05 localhost.localdomain systemd[1]: Starting The Apache H>
-Jan 03 15:14:05 localhost.localdomain httpd[38460]: AH00558: httpd: Cou>
-Jan 03 15:14:05 localhost.localdomain httpd[38460]: Server configured, >
-Jan 03 15:14:05 localhost.localdomain systemd[1]: Started The Apache HT>
-[john@localhost ~]$ sudo systemctl is-enabled httpd
+Jan 03 15:14:05 db.localdomain systemd[1]: Starting The Apache H>
+Jan 03 15:14:05 db.localdomain httpd[38460]: AH00558: httpd: Cou>
+Jan 03 15:14:05 db.localdomain httpd[38460]: Server configured, >
+Jan 03 15:14:05 db.localdomain systemd[1]: Started The Apache HT>
+[john@db ~]$ sudo systemctl is-enabled httpd
 [sudo] password for john:
 enabled
-[john@localhost ~]$ sudo ss -lantpu | grep httpd
+[john@db ~]$ sudo ss -lantpu | grep httpd
 tcp   LISTEN 0      511                   *:80              *:*     users:(("httpd",pid=1618,fd=4),("httpd",pid=1617,fd=4),("httpd",pid=1616,fd=4),("httpd",pid=1614,fd=4))
-[john@localhost ~]$ sudo firewall-cmd --zone=public --permanent --add-port=443/tcp
+[john@db ~]$ sudo firewall-cmd --zone=public --permanent --add-port=443/tcp
 success
-[john@localhost ~]$ sudo firewall-cmd --reload
+[john@db ~]$ sudo firewall-cmd --reload
 success
 ```
 
@@ -68,8 +68,8 @@ $ curl http://10.105.1.11/ |head -10
 ### 🌞 Le service Apache... 🌞
 
 ```
-[john@localhost ~]$ cd /etc
-[john@localhost etc]$ systemctl cat httpd | tail -10
+[john@db ~]$ cd /etc
+[john@db etc]$ systemctl cat httpd | tail -10
 ExecStart=/usr/sbin/httpd $OPTIONS -DFOREGROUND
 ExecReload=/usr/sbin/httpd $OPTIONS -k graceful
 # Send SIGWINCH for graceful stop
@@ -85,20 +85,20 @@ WantedBy=multi-user.target
 ### 🌞 Déterminer sous quel utilisateur tourne le processus Apache 🌞
 
 ```
-[john@localhost ~]$ sudo cat /etc/httpd/conf/httpd.conf | grep apache
+[john@db ~]$ sudo cat /etc/httpd/conf/httpd.conf | grep apache
 [sudo] password for john:
 User apache
 Group apache
     # http://httpd.apache.org/docs/2.4/mod/core.html#options
-[john@localhost httpd]$ ps -ef | grep httpd
+[john@db httpd]$ ps -ef | grep httpd
 root        1614       1  0 12:05 ?        00:00:00 /usr/sbin/httpd -DFOREGROUND
 apache      1615    1614  0 12:05 ?        00:00:00 /usr/sbin/httpd -DFOREGROUND
 apache      1616    1614  0 12:05 ?        00:00:02 /usr/sbin/httpd -DFOREGROUND
 apache      1617    1614  0 12:05 ?        00:00:02 /usr/sbin/httpd -DFOREGROUND
 apache      1618    1614  0 12:05 ?        00:00:02 /usr/sbin/httpd -DFOREGROUND
 john        1916    1281  0 12:37 pts/0    00:00:00 grep --color=auto httpd
-[john@localhost httpd]$ cd /usr/share/testpage/
-[john@localhost testpage]$ ls -al
+[john@db httpd]$ cd /usr/share/testpage/
+[john@db testpage]$ ls -al
 total 12
 drwxr-xr-x.  2 root root   24 Jan 17 12:02 .
 drwxr-xr-x. 83 root root 4096 Jan 17 12:02 ..
@@ -108,15 +108,15 @@ drwxr-xr-x. 83 root root 4096 Jan 17 12:02 ..
 ### 🌞 Changer l'utilisateur utilisé par Apache 🌞
 
 ```
-[john@localhost ~]$ sudo useradd guillaume -s /sbin/nologin -u 6969 -d /usr/share/httpd -p root
-[john@localhost ~]$ sudo cat /etc/passwd | tail -2
+[john@db ~]$ sudo useradd guillaume -s /sbin/nologin -u 6969 -d /usr/share/httpd -p root
+[john@db ~]$ sudo cat /etc/passwd | tail -2
 apache:x:48:48:Apache:/usr/share/httpd:/sbin/nologin
 guillaume:x:6969:6969::/usr/share/httpd:/sbin/nologin
-[john@localhost ~]$ sudo cat /etc/httpd/conf/httpd.conf | grep guillaume
+[john@db ~]$ sudo cat /etc/httpd/conf/httpd.conf | grep guillaume
 User guillaume
 Group guillaume
-[john@localhost /]$ sudo systemctl restart httpd
-[john@localhost /]$ systemctl status httpd
+[john@db /]$ sudo systemctl restart httpd
+[john@db /]$ systemctl status httpd
 ● httpd.service - The Apache HTTP Server
      Loaded: loaded (/usr/lib/systemd/system/httpd.service; enabled; vendor preset: disabled)
      Active: active (running) since Thu 2023-01-26 16:18:49 CET; 14s ago
@@ -133,11 +133,11 @@ Group guillaume
              ├─1608 /usr/sbin/httpd -DFOREGROUND
              └─1609 /usr/sbin/httpd -DFOREGROUND
 
-Jan 26 16:18:49 localhost.localdomain systemd[1]: Starting The Apache HTTP Server...
-Jan 26 16:18:49 localhost.localdomain httpd[1604]: AH00558: httpd: Could not reliably determine the server's fully qualified domain >
-Jan 26 16:18:49 localhost.localdomain httpd[1604]: Server configured, listening on: port 80
-Jan 26 16:18:49 localhost.localdomain systemd[1]: Started The Apache HTTP Server.
-[john@localhost /]$ ps -ef | grep guillaume
+Jan 26 16:18:49 db.localdomain systemd[1]: Starting The Apache HTTP Server...
+Jan 26 16:18:49 db.localdomain httpd[1604]: AH00558: httpd: Could not reliably determine the server's fully qualified domain >
+Jan 26 16:18:49 db.localdomain httpd[1604]: Server configured, listening on: port 80
+Jan 26 16:18:49 db.localdomain systemd[1]: Started The Apache HTTP Server.
+[john@db /]$ ps -ef | grep guillaume
 guillaume      1488    1487  0 09:16 ?        00:00:00 /usr/sbin/httpd -DFOREGROUND
 guillaume      1489    1487  0 09:16 ?        00:00:00 /usr/sbin/httpd -DFOREGROUND
 guillaume      1490    1487  0 09:16 ?        00:00:00 /usr/sbin/httpd -DFOREGROUND
@@ -148,14 +148,14 @@ john    1706    1410  0 09:17 pts/0    00:00:00 grep --color=auto guillaume
 ### 🌞 Faites en sorte que Apache tourne sur un autre port 🌞
 
 ```
-[john@localhost /]$ sudo cat /etc/httpd/conf/httpd.conf | grep Listen
+[john@db /]$ sudo cat /etc/httpd/conf/httpd.conf | grep Listen
 Listen 8080
-[john@localhost /]$ sudo firewall-cmd --zone=public --permanent --add-port=8080/tcp
+[john@db /]$ sudo firewall-cmd --zone=public --permanent --add-port=8080/tcp
 success
-[john@localhost /]$ sudo firewall-cmd --reload
+[john@db /]$ sudo firewall-cmd --reload
 success
-[john@localhost /]$ sudo systemctl restart httpd
-[john@localhost /]$ systemctl status httpd
+[john@db /]$ sudo systemctl restart httpd
+[john@db /]$ systemctl status httpd
 ● httpd.service - The Apache HTTP Server
      Loaded: loaded (/usr/lib/systemd/system/httpd.service; enabled; ve>
      Active: active (running) since Mon 2023-01-09 09:21:51 CET; 5s ago
@@ -172,14 +172,14 @@ success
              ├─1745 /usr/sbin/httpd -DFOREGROUND
              └─1746 /usr/sbin/httpd -DFOREGROUND
 
-Jan 09 09:21:51 localhost.localdomain systemd[1]: Starting The Apache H>
-Jan 09 09:21:51 localhost.localdomain httpd[1741]: AH00558: httpd: Coul>
-Jan 09 09:21:51 localhost.localdomain httpd[1741]: Server configured, l>
-Jan 09 09:21:51 localhost.localdomain systemd[1]: Started The Apache HT>
+Jan 09 09:21:51 db.localdomain systemd[1]: Starting The Apache H>
+Jan 09 09:21:51 db.localdomain httpd[1741]: AH00558: httpd: Coul>
+Jan 09 09:21:51 db.localdomain httpd[1741]: Server configured, l>
+Jan 09 09:21:51 db.localdomain systemd[1]: Started The Apache HT>
 lines 1-20/20 (END)
-[john@localhost /]$ sudo ss -lnaptu | grep 8080
+[john@db /]$ sudo ss -lnaptu | grep 8080
 tcp   LISTEN 0      511                   *:8080            *:*     users:(("httpd",pid=1746,fd=4),("httpd",pid=1745,fd=4),("httpd",pid=1744,fd=4),("httpd",pid=1741,fd=4))
-[john@localhost /]$curl localhost:8080 | head -10
+[john@db /]$curl db:8080 | head -10
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--100  7620  100  7620    0     0  1488k      0 --:--:-- --:--:-- --:--:-- 1488k

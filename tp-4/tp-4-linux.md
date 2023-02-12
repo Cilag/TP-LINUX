@@ -259,16 +259,16 @@ public (active)
 ###  🌞 Changer l'utilisateur qui lance le service 🌞
 ```
 [john@web ~]$ sudo  cat /etc/nginx/nginx.conf | grep user
-user ellucas;
+user john;
     log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
                       '"$http_user_agent" "$http_x_forwarded_for"';
 ```
 ```
 [john@web ~]$ sudo ps -eFly | grep nginx
 S root       33724       1  0  80   0   952  2521 sigsus   1 14:47 ?        00:00:00 nginx: master process /usr/sbin/nginx
-S ellucas    33725   33724  0  80   0  4668  3469 ep_pol   0 14:47 ?        00:00:00 nginx: worker process
-S ellucas    33726   33724  0  80   0  4668  3469 ep_pol   1 14:47 ?        00:00:00 nginx: worker process
-S elbatis+   33728     892  0  80   0  2160  1602 pipe_r   1 14:47 pts/0    00:00:00 grep --color=auto nginx
+S john    33725   33724  0  80   0  4668  3469 ep_pol   0 14:47 ?        00:00:00 nginx: worker process
+S john    33726   33724  0  80   0  4668  3469 ep_pol   1 14:47 ?        00:00:00 nginx: worker process
+S john+   33728     892  0  80   0  2160  1602 pipe_r   1 14:47 pts/0    00:00:00 grep --color=auto nginx
 ```
 
 ###  🌞 Changer l'emplacement de la racine Web 🌞
