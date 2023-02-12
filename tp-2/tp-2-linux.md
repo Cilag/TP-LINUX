@@ -33,9 +33,9 @@ Dec 06 10:34:09 vmlinux sshd[864]: pam_unix(sshd:session): session open>
 [john@vmlinux ~]$ ps -ef | grep sshd
 root         714       1  0 10:30 ?        00:00:00 sshd: /usr/sbin/ssh
  -D [listener] 0 of 10-100 startups
-root         864     714  0 10:34 ?        00:00:00 sshd: john [priv]
-elbatis+     868     864  0 10:34 ?        00:00:00 sshd: john@pts/0
-elbatis+     909     869  0 10:46 pts/0    00:00:00 grep --color=auto sshd
+root      864     714  0 10:34 ?        00:00:00 sshd: john [priv]
+john+     868     864  0 10:34 ?        00:00:00 sshd: john@pts/0
+john+     909     869  0 10:46 pts/0    00:00:00 grep --color=auto sshd
 ```
 
 ####  Déterminer le port sur lequel écoute le service SSH
@@ -147,7 +147,7 @@ success
 root       44066       1  0 12:02 ?        00:00:00 nginx: master process /usr/sbin/nginx
 nginx      44067   44066  0 12:02 ?        00:00:00 nginx: worker process
 nginx      44068   44066  0 12:02 ?        00:00:00 nginx: worker process
-elbatis+   44127    1342  0 12:12 pts/0    00:00:00 grep --color=auto nginx
+john+   44127    1342  0 12:12 pts/0    00:00:00 grep --color=auto nginx
 ```
 
 #### Euh wait
