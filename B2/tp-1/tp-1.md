@@ -497,8 +497,92 @@ Type "help", "copyright", "credits" or "license" for more information.
 
 🌞 Ecrire un Dockerfile pour une image qui héberge une application Python
 ```
-
+[c1@localhost python_app_build]$ docker build . -t python_app:version_de_ouf
+[+] Building 1.0s (12/12) FINISHED                                                                                    docker:default
+ => [internal] load build definition from Dockerfile                                                                            0.0s
+ => => transferring dockerfile: 283B                                                                                            0.0s
+ => [internal] load .dockerignore                                                                                               0.0s
+ => => transferring context: 2B                                                                                                 0.0s
+ => [internal] load metadata for docker.io/library/ubuntu:latest                                                                0.8s
+ => [1/7] FROM docker.io/library/ubuntu:latest@sha256:6042500cf4b44023ea1894effe7890666b0c5c7871ed83a97c36c76ae560bb9b          0.0s
+ => [internal] load build context                                                                                               0.0s
+ => => transferring context: 367B                                                                                               0.0s
+ => CACHED [2/7] RUN apt-get update -y                                                                                          0.0s
+ => CACHED [3/7] RUN apt-get install -y python3                                                                                 0.0s
+ => CACHED [4/7] RUN apt-get install pip -y                                                                                     0.0s
+ => CACHED [5/7] RUN pip install emoji                                                                                          0.0s
+ => CACHED [6/7] WORKDIR /app                                                                                                   0.0s
+ => [7/7] COPY . /app                                                                                                           0.1s
+ => exporting to image                                                                                                          0.1s
+ => => exporting layers                                                                                                         0.0s
+ => => writing image sha256:827683d1052f28b0e01c50af898803c8ea6e1c035526e2c8cd80e5a0e6462e6d                                    0.0s
+ => => naming to docker.io/library/python_app:version_de_ouf                                                                    0.0s
+ ```
+ 
+ ```
+[c1@localhost python_app_build]$ docker run python_app:version_de_ouf
+Cet exemple d'application est vraiment naze 👎
+[c1@localhost python_app_build]$
 ```
 # III. Docker compose
 
+🌞 Créez un fichier docker-compose.yml
 
+
+```
+[c1@localhost compose_test]$ cat docker-compose.yml
+version: "3"
+
+services:
+  conteneur_nul:
+    image: debian
+    entrypoint: sleep 9999
+  conteneur_floresque:
+    image: debian
+    entrypoint: sleep 9999
+```
+
+🌞 Lancez les deux conteneurs avec docker compose
+
+```
+[c1@localhost compose_test]$ docker compose up -d
+[+] Running 3/3
+ ✔ conteneur_floresque 1 layers [⣿]      0B/0B      Pulled                                                                     19.3s
+   ✔ 1b13d4e1a46e Pull complete                                                                                                13.4s
+ ✔ conteneur_nul Pulled                                                                                                        19.3s
+[+] Running 3/3
+ ✔ Network compose_test_default                  Created                                                                        0.4s
+ ✔ Container compose_test-conteneur_floresque-1  Started                                                                        0.4s
+ ✔ Container compose_test-conteneur_nul-1        Started                                                                        0.4s
+```
+
+🌞 Vérifier que les deux conteneurs tournent
+
+```
+[c1@localhost compose_test]$ docker compose ps
+NAME                                 IMAGE     COMMAND        SERVICE               CREATED          STATUS          PORTS
+compose_test-conteneur_floresque-1   debian    "sleep 9999"   conteneur_floresque   52 seconds ago   Up 51 seconds
+compose_test-conteneur_nul-1         debian    "sleep 9999"   conteneur_nul         52 seconds ago   Up 51 seconds
+[c1@localhost compose_test]$
+```
+
+🌞 Pop un shell dans le conteneur conteneur_nul
+```
+root@0470caf512b1:/# apt-get update
+
+root@0470caf512b1:/# apt-get install -y iputils-ping
+```
+```
+root@0470caf512b1:/# ping conteneur_floresque
+PING conteneur_floresque (172.18.0.3) 56(84) bytes of data.
+64 bytes from compose_test-conteneur_floresque-1.compose_test_default (172.18.0.3): icmp_seq=1 ttl=64 time=0.225 ms
+64 bytes from compose_test-conteneur_floresque-1.compose_test_default (172.18.0.3): icmp_seq=2 ttl=64 time=1.17 ms
+64 bytes from compose_test-conteneur_floresque-1.compose_test_default (172.18.0.3): icmp_seq=3 ttl=64 time=0.392 ms
+64 bytes from compose_test-conteneur_floresque-1.compose_test_default (172.18.0.3): icmp_seq=4 ttl=64 time=0.676 ms
+64 bytes from compose_test-conteneur_floresque-1.compose_test_default (172.18.0.3): icmp_seq=5 ttl=64 time=0.130 ms
+^C
+--- conteneur_floresque ping statistics ---
+5 packets transmitted, 5 received, 0% packet loss, time 4079ms
+rtt min/avg/max/mdev = 0.130/0.519/1.174/0.376 ms
+root@0470caf512b1:/#
+```
