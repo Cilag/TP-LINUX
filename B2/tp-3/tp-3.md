@@ -433,16 +433,7 @@ m.root-servers.net.     171946  IN      A       202.12.27.33
 
 🌞 **Adaptez votre `Vagrantfile`** pour qu'il lance les VMs suivantes (en réutilisant votre box de la partie précédente)
 
-- vous devez utiliser une boucle for dans le `Vagrantfile`
-- pas le droit de juste copier coller le même bloc trois fois, une boucle for j'ai dit !
-
-| Name           | IP locale   | Accès internet | RAM |
-| -------------- | ----------- | -------------- | --- |
-| `node1.tp3.b2` | `10.3.1.11` | Ui             | 1G  |
-| `node2.tp3.b2` | `10.3.1.12` | Ui             | 1G  |
-| `node3.tp3.b2` | `10.3.1.13` | Ui             | 1G  |
-
-📁 **`partie1/Vagrantfile-3A`** dans le dépôt git de rendu
+[Vagrantfile-3A](partie1/Vagrantfile-3A)
 
 🌞 **Adaptez votre `Vagrantfile`** pour qu'il lance les VMs suivantes (en réutilisant votre box de la partie précédente)
 
@@ -457,5 +448,5 @@ m.root-servers.net.     171946  IN      A       202.12.27.33
 
 📁 **`partie1/Vagrantfile-3B`** dans le dépôt git de rendu
 
-> *La syntaxe Ruby c'est vraiment dégueulasse.*
+
 

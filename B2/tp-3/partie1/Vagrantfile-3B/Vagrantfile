@@ -1,0 +1,40 @@
+vms = [
+  { name: "alice.tp3.b2", ip: "10.3.1.11", ram: "1024", ui: "true"},
+  { name: "bob.tp3.b2", ip: "10.3.1.200", ram: "2048", ui: "true" },
+  { name: "eve.tp3.b2", ip: "10.3.1.57", ram: "1024", ui: "false"}
+]
+
+Vagrant.configure("2") do |config|
+  
+  config.vm.box = "super_box"
+
+  vms.each do |vm|
+    config.vm.define vm[:name] do |node|
+      node.vm.hostname = vm[:name]
+      node.vm.network "private_network", type: "static", ip: vm[:ip]
+      
+      if vm[:ui] == "true"
+        node.vm.provider "virtualbox" do |vb|
+          vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+          vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+        end
+      end
+
+      if vm[:ui] == "false"
+        config.vm.provision "shell", inline: <<-SHELL
+          sudo iptables -F
+          sudo iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+          sudo iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+          sudo iptables -P INPUT DROP
+          sudo iptables -P FORWARD DROP
+          sudo iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+          sudo iptables -P OUTPUT DROP
+        SHELL
+      end
+      node.vm.provider "virtualbox" do |vb|
+        vb.memory = vm[:ram]
+      end
+
+    end
+  end
+end
